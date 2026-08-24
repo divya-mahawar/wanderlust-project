@@ -1,0 +1,108 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+
+    <h2 class="mb-4">Bookings for My Listings</h2>
+
+    <% if (bookings.length === 0) { %>
+
+        <div class="alert alert-info">
+            No bookings for your listings yet.
+        </div>
+
+    <% } else { %>
+
+        <div class="row">
+
+            <% bookings.forEach(booking => { %>
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="card shadow-sm">
+
+                        <% if (booking.listing && booking.listing.image) { %>
+
+                            <img
+                                src="<%= booking.listing.image.url %>"
+                                class="card-img-top"
+                                style="height:220px; object-fit:cover;"
+                                alt="listing"
+                            >
+
+                        <% } %>
+
+                        <div class="card-body">
+
+                            <h4>
+                                <%= booking.listing.title %>
+                            </h4>
+
+                            <p class="text-muted">
+                                <%= booking.listing.location %>,
+                                <%= booking.listing.country %>
+                            </p>
+
+                            <hr>
+
+                            <p>
+                                <b>Guest:</b>
+                                <%= booking.user.username %>
+                            </p>
+
+                            <p>
+                                <b>Email:</b>
+                                <%= booking.user.email %>
+                            </p>
+
+                            <p>
+                                <b>Check-in:</b>
+                                <%= new Date(booking.checkIn).toLocaleDateString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Check-out:</b>
+                                <%= new Date(booking.checkOut).toLocaleDateString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Guests:</b>
+                                <%= booking.guests %>
+                            </p>
+
+                            <p>
+                                <b>Total:</b>
+                                ₹<%= booking.totalPrice.toLocaleString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Status:</b>
+
+                                <% if (booking.status === "confirmed") { %>
+
+                                    <span class="badge bg-success">
+                                        Confirmed
+                                    </span>
+
+                                <% } else { %>
+
+                                    <span class="badge bg-danger">
+                                        Cancelled
+                                    </span>
+
+                                <% } %>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <% }) %>
+
+        </div>
+
+    <% } %>
+
+</div>

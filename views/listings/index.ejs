@@ -1,52 +1,128 @@
   <% layout("/layouts/boilerplate") %>
   <%= success %>
-   <style>
- #filters{
-  display:flex;
-  flex-wrap:wrap;
+  <style>
+  #filters {
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+    padding: 1rem 2rem;
+    margin-top: 1rem;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .filter {
+    flex: 0 0 auto;
+    width: 80px;
+    text-align: center;
+    opacity: 0.7;
+    text-decoration: none;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .filter:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .filter i {
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .filter p {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+
+  .tax-toggle {
+    flex: 0 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    height: 3.5rem;
+    padding: 0.8rem 1rem;
+    margin-left: 1rem;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+  }
+
+  .tax-toggle:hover {
+    border-color: #999;
+  }
+
+  .tax-info {
+    display: none;
+  }
+
+  /* scrollbar */
+  #filters::-webkit-scrollbar {
+    height: 5px;
+  }
+
+  #filters::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+  }
+
+ .filter-options {
+  display: flex;
   align-items: center;
- }
-
- .filter{
-  text-align:center;
-  margin-right:1rem;
-  margin-top:2rem;
-  opacity:0.7;
- }
-
- .filter:hover{
-  opacity: 1;
-  cursor:pointer;
- }
-.filter p{
-  font-size: 0.8rem;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0 2rem 1rem 2rem;
+  width: 100%;
 }
 
-.tax-info{
-  display:none;
+.price-filter {
+  flex: 0 0 auto;
 }
 
-.tax-toggle{
-  bordeer: 1px solid black;
-  border-radious: 1 rem;
-  height: 3.5rem;
-  padding: 1rem;
-  margin-left: 3rem;
-  display:flex;
+.price-filter form {
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+}
+
+.price-input {
+  width: 100px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.price-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background-color: #fe424d;
+  color: white;
+  cursor: pointer;
+}
+
+.price-btn:hover {
+  background-color: #e63946;
+}
+  
+  @media (max-width: 768px) {
+
+  .filter-options {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding: 0 1rem 1rem;
+  }
+
+  .price-input {
+    width: 90px;
+  }
 
 }
-   </style>
-      <div id="filters">
-           <div class="filter">
-             <div> <i class="fa-solid fa-fire"></i></div>
-             <p>Trending</p>
-           </div>
-           
-           <div class="filter">
-             <div> <i class="fa-solid fa-bed"></i></div>
-             <p>Rooms</p>
-           </div>
+ </style>
 
           <div class="filter">
              <div><i class="fa-solid fa-mountain-city"></i></div>
@@ -68,53 +144,117 @@
     
            </div>
 
-           <div class="filter">
-             <div> <i class="fa-duotone fa-regular fa-cabin"></i></div>
-             <p>Camping</p>
-           </div>
+  <a href="/listings?category=Trending" class="filter">
+    <div>
+      <i class="fa-solid fa-fire"></i>
+    </div>
+    <p>Trending</p>
+  </a>
 
-           <div class="filter">
-             <div><i class="fa-duotone fa-solid fa-cow"></i> </div>
-             <p>Farms</p>
-           </div>
+  <a href="/listings?category=Rooms" class="filter">
+    <div>
+      <i class="fa-solid fa-bed"></i>
+    </div>
+    <p>Rooms</p>
+  </a>
 
-           <div class="filter">
-             <div><i class="fa-solid fa-butterfly"></i></div>
-             <p>Wildlife</p>
-           </div>
+  <a href="/listings?category=Iconic%20Cities" class="filter">
+    <div>
+      <i class="fa-solid fa-mountain-city"></i>
+    </div>
+    <p>Iconic Cities</p>
+  </a>
 
-          <div class="filter">
-             <div> <i class="fa-duotone fa-regular fa-cabin"></i></div>
-             <p>Camping</p>
-           </div>
+  <a href="/listings?category=Mountains" class="filter">
+    <div>
+      <i class="fa-solid fa-mountain"></i>
+    </div>
+    <p>Mountains</p>
+  </a>
 
-           <div class="filter">
-             <div><i class="fa-duotone fa-solid fa-cow"></i> </div>
-             <p>Farms</p>
-           </div>
+  <a href="/listings?category=Castles" class="filter">
+    <div>
+      <i class="fa-solid fa-chess-rook"></i>
+    </div>
+    <p>Castles</p>
+  </a>
 
-           <div class="filter">
-             <div> <i class="fa-solid fa-bed"></i></div>
-             <p>Rooms</p>
-           </div>
+  <a href="/listings?category=Amazing%20Pools" class="filter">
+    <div>
+      <i class="fa-solid fa-person-swimming"></i>
+    </div>
+    <p>Amazing Pools</p>
+  </a>
 
-          <div class="filter">
-             <div><i class="fa-solid fa-mountain-city"></i></div>
-             <p>iconic cities</p>
-           </div>
-            <div class="filter">
-             <div><i class="fa-solid fa-mountains"></i></div>
-             <p>mountaons</p>
-    
-           </div>
-        
-           <div class="tax-toggle">
-         <div class="form-check-reverse form-switch">
-  <input class="form-check-input" type="checkbox" role="switch" id="flexswitchCheckDefault">
-  <label class="form-check-label" for="flexswitchCheckDefault">Display total after taxes</label>
+  <a href="/listings?category=Camping" class="filter">
+    <div>
+      <i class="fa-solid fa-campground"></i>
+    </div>
+    <p>Camping</p>
+  </a>
+
+  <a href="/listings?category=Farms" class="filter">
+    <div>
+      <i class="fa-solid fa-cow"></i>
+    </div>
+    <p>Farms</p>
+  </a>
+
+  <a href="/listings?category=Wildlife" class="filter">
+    <div>
+      <i class="fa-solid fa-butterfly"></i>
+    </div>
+    <p>Wildlife</p>
+  </a>
+
+  <div class="price-filter">
+    <form action="/listings" method="GET">
+
+      <input
+        type="number"
+        name="minPrice"
+        placeholder="Min ₹"
+        class="price-input"
+      />
+
+      <input
+        type="number"
+        name="maxPrice"
+        placeholder="Max ₹"
+        class="price-input"
+      />
+
+      <button type="submit" class="price-btn">
+        Filter
+      </button>
+
+    </form>
+  </div>
+
 </div>
+
+  <div class="tax-toggle">
+    <div class="form-check-reverse form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="flexswitchCheckDefault"
+      >
+
+      <label
+        class="form-check-label"
+        for="flexswitchCheckDefault"
+      >
+        Display total after taxes
+      </label>
+    </div>
+  </div>
+
+  
+
+
 </div>
-      </div>
       <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
          <% for(let listing of allListings){%>
           <a  href="/listings/<%= listing._id %>"  class="listing-link">

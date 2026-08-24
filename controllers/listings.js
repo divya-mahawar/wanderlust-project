@@ -3,29 +3,47 @@ const fetch = require("node-fetch");
 require("dotenv").config();
 
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
 
-  console.log(allListings); // debug
+  const { category, search, minPrice, maxPrice } = req.query;
+
+  let filter = {};
+
+  if (category) {
+    filter.category = category;
+  }
+
+  if (search) {
+    filter.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { location: { $regex: search, $options: "i" } },
+      { country: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  if (minPrice || maxPrice) {
+
+    filter.price = {};
+
+    if (minPrice) {
+      filter.price.$gte = Number(minPrice);
+    }
+
+    if (maxPrice) {
+      filter.price.$lte = Number(maxPrice);
+    }
+  }
+
+  const allListings = await Listing.find(filter);
 
   res.render("listings/index.ejs", { allListings });
 };
+
 module.exports.renderNewForm = (req, res) => {
   res.render("listings/new.ejs");
 };
 
 
-apna college sigma 9.0
 
-
-AI Mode
-All
-Images
-Videos
-News
-Shopping
-Forums
-More
-Tools
 
 module.exports.showlistings = async (req, res) => {
   let { id } = req.params;
@@ -72,7 +90,7 @@ module.exports.creatiListing = async (req, res) => {
       filename: req.file.filename
     };
 
-    // 💥 THIS WAS MISSING / NOT WORKING BEFORE
+    //  THIS WAS MISSING / NOT WORKING BEFORE
     newListing.geometry = {
       type: "Point",
       coordinates: coordinates

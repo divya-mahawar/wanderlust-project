@@ -34,10 +34,75 @@
            <P class="card-text"> <%= listing.description %></P>
            <p class="card-text"> &#8377; <%= listing.price.toLocaleString("en-IN")%> </p>
            <p class="card-text"> <%= listing.location %> </p> 
-           <p class="card-text"><%= listing.country %> </p>
-            
-       </div>
-    </div>
+         <p class="card-text"><%= listing.country %> </p>
+
+<hr>
+
+<div class="booking-box mt-4">
+    <h4>Reserve this place</h4>
+
+    <form action="/listings/<%= listing._id %>/bookings" method="POST">
+
+        <div class="row">
+
+            <!-- Check-in -->
+            <div class="col-md-6 mb-3">
+                <label for="checkIn" class="form-label">
+                    <b>Check-in</b>
+                </label>
+
+                <input
+                    type="date"
+                    id="checkIn"
+                    name="checkIn"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <!-- Check-out -->
+            <div class="col-md-6 mb-3">
+                <label for="checkOut" class="form-label">
+                    <b>Check-out</b>
+                </label>
+
+                <input
+                    type="date"
+                    id="checkOut"
+                    name="checkOut"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <!-- Guests -->
+            <div class="col-md-6 mb-3">
+                <label for="guests" class="form-label">
+                    <b>Guests</b>
+                </label>
+
+                <input
+                    type="number"
+                    id="guests"
+                    name="guests"
+                    class="form-control"
+                    min="1"
+                    value="1"
+                    required
+                >
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn btn-dark">
+            Reserve
+        </button>
+
+    </form>
+</div>
+
+</div>
+     
 
    <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
     <div class="btns">

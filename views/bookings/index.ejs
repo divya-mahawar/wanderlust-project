@@ -1,0 +1,142 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+
+    <h2 class="mb-4">My Bookings</h2>
+
+    <% if (bookings.length === 0) { %>
+
+        <div class="alert alert-info">
+            You have no bookings yet.
+        </div>
+
+        <a href="/listings" class="btn btn-dark">
+            Explore Listings
+        </a>
+
+    <% } else { %>
+
+        <div class="row">
+
+            <% bookings.forEach(booking => { %>
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="card shadow-sm">
+
+                        <% if (booking.listing && booking.listing.image) { %>
+
+                            <img
+                                src="<%= booking.listing.image.url %>"
+                                class="card-img-top"
+                                style="height: 220px; object-fit: cover;"
+                                alt="listing image"
+                            >
+
+                        <% } %>
+
+                        <div class="card-body">
+
+                            <% if (booking.listing) { %>
+
+                                <h4>
+                                    <%= booking.listing.title %>
+                                </h4>
+
+                                <p class="text-muted">
+                                    <%= booking.listing.location %>,
+                                    <%= booking.listing.country %>
+                                </p>
+
+                            <% } else { %>
+
+                                <h4>Listing no longer available</h4>
+
+                            <% } %>
+
+
+                            <hr>
+
+
+                            <p>
+                                <b>Check-in:</b>
+                                <%= new Date(booking.checkIn).toLocaleDateString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Check-out:</b>
+                                <%= new Date(booking.checkOut).toLocaleDateString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Guests:</b>
+                                <%= booking.guests %>
+                            </p>
+
+                            <p>
+                                <b>Total Price:</b>
+                                ₹<%= booking.totalPrice.toLocaleString("en-IN") %>
+                            </p>
+
+                            <p>
+                                <b>Status:</b>
+
+                                <% if (booking.status === "confirmed") { %>
+
+                                    <span class="badge bg-success">
+                                        Confirmed
+                                    </span>
+
+                                <% } else { %>
+
+                                    <span class="badge bg-secondary">
+                                        <%= booking.status %>
+                                    </span>
+
+                                <% } %>
+
+                            </p>
+
+
+                            <% if (booking.listing) { %>
+
+                                <a
+                                    href="/listings/<%= booking.listing._id %>"
+                                    class="btn btn-dark"
+                                >
+                                    View Listing
+                                </a>
+
+                            <% } %>
+
+
+                       <% if (booking.status === "confirmed") { %>
+
+    <form
+        action="/bookings/<%= booking._id %>/cancel"
+        method="POST"
+        style="display: inline;"
+    >
+        <button
+            type="submit"
+            class="btn btn-outline-danger"
+            onclick="return confirm('Are you sure you want to cancel this booking?')"
+        >
+            Cancel Booking
+        </button>
+    </form>
+
+<% } %>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <% }) %>
+
+        </div>
+
+    <% } %>
+
+</div>

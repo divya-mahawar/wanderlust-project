@@ -30,6 +30,8 @@ const { getDefaultAutoSelectFamily } = require("net");
 
 const dbUrl = process.env.ATLASDB_URL;
 
+const bookingRouter = require("./routes/booking");
+
 
 main()
   .then(() => {
@@ -110,9 +112,12 @@ app.get("/", (req, res) => {
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", UserRouter)
+app.use("/", bookingRouter);
 
 
  app.all("*", (req, res, next)=>{
+   console.log("❌ 404 URL =", req.originalUrl);
+  console.log("❌ METHOD =", req.method);
   next(new ExpressError(404, "page not found"));
  });
 app.use((err, req, res, next) => {
