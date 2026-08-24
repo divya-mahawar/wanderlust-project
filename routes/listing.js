@@ -89,7 +89,16 @@ router.get("/:id/nearby", async (req, res) => {
 
         const [longitude, latitude] =
             listing.geometry.coordinates;
+         
 
+             // USER PREFERENCES
+
+        let preferences = req.query.preferences
+            ? req.query.preferences.split(",")
+            : [];
+
+
+        console.log("USER PREFERENCES =", preferences);
 
         // 5 KM radius
         const radius = 20000;
@@ -128,7 +137,6 @@ const nearbyPlaces = features
 
         let type = "Nearby Place";
 
-
         if (
             properties.categories?.some(
                 category =>
@@ -158,7 +166,11 @@ const nearbyPlaces = features
             placeLatitude,
             placeLongitude
         );
-      const bestTime = getBestVisitingTime(type);
+
+
+        const bestTime =
+            getBestVisitingTime(type);
+
 
         return {
 
@@ -174,12 +186,40 @@ const nearbyPlaces = features
 
             distance:
                 Number(distance.toFixed(2)),
-                  bestTime: bestTime
+
+            bestTime: bestTime
 
         };
 
     });
 
+
+    // 👇 YAHAN ADD KARNA HAI
+
+if (preferences.length > 0) {
+
+    nearbyPlaces.sort((a, b) => {
+
+        const aMatch =
+            preferences.includes(a.type);
+
+        const bMatch =
+            preferences.includes(b.type);
+
+
+        if (aMatch && !bMatch) {
+            return -1;
+        }
+
+        if (!aMatch && bMatch) {
+            return 1;
+        }
+
+        return a.distance - b.distance;
+
+    });
+
+}
 
         res.json({
 
