@@ -176,7 +176,115 @@
     <div id="map" style="height: 400px;"></div>
 
       </div>
+          <!-- Nearby Places -->
+<div class="container-fluid mt-5 mb-5 nearby-section">
 
+    <h3>Nearby Places</h3>
+
+    <div id="nearby-loading" class="text-muted">
+        Finding nearby places...
+    </div>
+
+    <div id="nearby-error" class="alert alert-danger d-none">
+        Unable to load nearby places.
+    </div>
+
+    <div id="nearby-places" class="row g-3">
+    </div>
+
+</div>
+
+<script>
+    const listingId = "<%= listing._id %>";
+
+    async function loadNearbyPlaces() {
+
+        const loading = document.getElementById("nearby-loading");
+        const error = document.getElementById("nearby-error");
+        const container = document.getElementById("nearby-places");
+
+        try {
+
+            const response = await fetch(
+                `/listings/${listingId}/nearby`
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch nearby places");
+            }
+
+            const data = await response.json();
+
+            loading.classList.add("d-none");
+
+            if (!data.places || data.places.length === 0) {
+
+                container.innerHTML = `
+                    <div class="col-12">
+                        <p class="text-muted">
+                            No nearby places found.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            container.innerHTML = data.places.map(place => `
+
+               <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+
+                    <div class="card h-100 nearby-card">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                ${place.name}
+                            </h5>
+
+                            <p class="nearby-info">
+                                <strong>Type:</strong>
+                                ${place.type}
+                            </p>
+
+                            <p class="nearby-info">
+                                <strong>Distance:</strong>
+                                ${place.distance} km
+                            </p>
+
+                            <p class="nearby-info">
+                                <strong>Best Time:</strong>
+                                ${place.bestTime}
+                            </p>
+
+                            <a
+                                href="${place.mapsUrl}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="btn btn-outline-dark nearby-map-btn"
+                            >
+                                 View on Map
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `).join("");
+
+        } catch (err) {
+
+            console.error("Nearby Places Error:", err);
+
+            loading.classList.add("d-none");
+            error.classList.remove("d-none");
+        }
+    }
+
+    loadNearbyPlaces();
+</script> 
      </div>
 
 

@@ -10,12 +10,12 @@ body{
 
 /*navbar*/
 .navbar{
-    heigth: 5 rem;
+    height: 5rem;
     background-color: white;
 }
 .fa-compass{
     color: #fe424d;
-    font-size: 2 rem;
+    font-size: 2rem;
 }
 
 .nav-link{
@@ -64,17 +64,18 @@ body{
     margin-bottom: 2rem;
 }
 
-.card-img-top{
-    border-radius: 1rem ! important;
-    width: 100% ! important;
-    object-fit: cover ! important;
 
+.card-img-top {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
 }
 .card-body{
-    padding: 0 ! important;
+    padding: 0 !important;
 }
 .card-text p{
-    font-weigth: 400 ! important;
+    font-weight: 400 !important;
 }
 .listing-link{
     text-decoration: none;
@@ -113,4 +114,120 @@ body{
 .show-card{
     padding-left: 0;
     padding-right: 0;
+}
+
+/* 
+   Nearby Places
+ */
+
+.nearby-section {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    margin-top: 50px;
+    margin-bottom: 60px;
+}
+
+.nearby-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+/* Nearby card */
+#nearby-places .nearby-card {
+    height: 100%;
+    border: 1px solid #e8e8e8;
+    border-radius: 18px;
+    overflow: hidden;
+    background-color: #fff;
+    padding: 0;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+#nearby-places .nearby-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Nearby card image */
+#nearby-places .nearby-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Card body */
+#nearby-places .nearby-card .card-body {
+    padding: 24px 26px 22px !important;
+}
+
+/* Place name */
+#nearby-places .nearby-card .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #17202a;
+    line-height: 1.35;
+}
+
+/* Place information */
+#nearby-places .nearby-info {
+    margin-bottom: 13px;
+    color: #555;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+#nearby-places .nearby-info strong {
+    color: #222;
+    font-weight: 700;
+}
+
+/* Map button */
+#nearby-places .nearby-map-btn {
+    margin-top: 12px;
+    padding: 9px 18px;
+    border-radius: 9px;
+    border: 1px solid #222;
+    background-color: #fff;
+    color: #222;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#nearby-places .nearby-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    border-color: #ddd;
+}
+
+#nearby-places .nearby-map-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Loading */
+#nearby-loading {
+    padding: 15px 0;
+    font-size: 15px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .nearby-section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .nearby-title {
+        font-size: 24px;
+    }
+
+    #nearby-places .nearby-card img {
+        height: 200px;
+    }
 }

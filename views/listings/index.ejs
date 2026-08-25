@@ -124,113 +124,97 @@
 }
  </style>
 
-          <div class="filter">
-             <div><i class="fa-solid fa-mountain-city"></i></div>
-             <p>iconic cities</p>
-           </div>
-            <div class="filter">
-             <div><i class="fa-solid fa-mountains"></i></div>
-             <p>mountaons</p>
-    
-           </div>
-            <div class="filter">
-             <div><i class="fa-solid fa-castle"></i></div>
-             <p>castels</p>
-    
-           </div>
-           <div class="filter">
-             <div><i class="fa-solid fa-person-swimming"></i></div>
-             <p>amazing pools</p>
-    
-           </div>
+<div id="filters">
 
-  <a href="/listings?category=Trending" class="filter">
-    <div>
-      <i class="fa-solid fa-fire"></i>
+    <a href="/listings?category=Trending" class="filter">
+        <div>
+            <i class="fa-solid fa-fire"></i>
+        </div>
+        <p>Trending</p>
+    </a>
+
+    <a href="/listings?category=Rooms" class="filter">
+        <div>
+            <i class="fa-solid fa-bed"></i>
+        </div>
+        <p>Rooms</p>
+    </a>
+
+    <a href="/listings?category=Iconic%20Cities" class="filter">
+        <div>
+            <i class="fa-solid fa-mountain-city"></i>
+        </div>
+        <p>Iconic Cities</p>
+    </a>
+
+    <a href="/listings?category=Mountains" class="filter">
+        <div>
+            <i class="fa-solid fa-mountain"></i>
+        </div>
+        <p>Mountains</p>
+    </a>
+
+    <a href="/listings?category=Castles" class="filter">
+        <div>
+            <i class="fa-solid fa-chess-rook"></i>
+        </div>
+        <p>Castles</p>
+    </a>
+
+    <a href="/listings?category=Amazing%20Pools" class="filter">
+        <div>
+            <i class="fa-solid fa-person-swimming"></i>
+        </div>
+        <p>Amazing Pools</p>
+    </a>
+
+    <a href="/listings?category=Camping" class="filter">
+        <div>
+            <i class="fa-solid fa-campground"></i>
+        </div>
+        <p>Camping</p>
+    </a>
+
+    <a href="/listings?category=Farms" class="filter">
+        <div>
+            <i class="fa-solid fa-cow"></i>
+        </div>
+        <p>Farms</p>
+    </a>
+
+    <a href="/listings?category=Wildlife" class="filter">
+        <div>
+            <i class="fa-solid fa-hippo"></i>
+        </div>
+        <p>Wildlife</p>
+    </a>
+
+</div>
+
+ 
+
+ <div class="filter-options">
+    <div class="price-filter">
+        <form action="/listings" method="GET">
+            <input
+                type="number"
+                name="minPrice"
+                placeholder="Min ₹"
+                class="price-input"
+            />
+
+            <input
+                type="number"
+                name="maxPrice"
+                placeholder="Max ₹"
+                class="price-input"
+            />
+
+            <button type="submit" class="price-btn">
+                Filter
+            </button>
+        </form>
     </div>
-    <p>Trending</p>
-  </a>
-
-  <a href="/listings?category=Rooms" class="filter">
-    <div>
-      <i class="fa-solid fa-bed"></i>
-    </div>
-    <p>Rooms</p>
-  </a>
-
-  <a href="/listings?category=Iconic%20Cities" class="filter">
-    <div>
-      <i class="fa-solid fa-mountain-city"></i>
-    </div>
-    <p>Iconic Cities</p>
-  </a>
-
-  <a href="/listings?category=Mountains" class="filter">
-    <div>
-      <i class="fa-solid fa-mountain"></i>
-    </div>
-    <p>Mountains</p>
-  </a>
-
-  <a href="/listings?category=Castles" class="filter">
-    <div>
-      <i class="fa-solid fa-chess-rook"></i>
-    </div>
-    <p>Castles</p>
-  </a>
-
-  <a href="/listings?category=Amazing%20Pools" class="filter">
-    <div>
-      <i class="fa-solid fa-person-swimming"></i>
-    </div>
-    <p>Amazing Pools</p>
-  </a>
-
-  <a href="/listings?category=Camping" class="filter">
-    <div>
-      <i class="fa-solid fa-campground"></i>
-    </div>
-    <p>Camping</p>
-  </a>
-
-  <a href="/listings?category=Farms" class="filter">
-    <div>
-      <i class="fa-solid fa-cow"></i>
-    </div>
-    <p>Farms</p>
-  </a>
-
-  <a href="/listings?category=Wildlife" class="filter">
-    <div>
-      <i class="fa-solid fa-butterfly"></i>
-    </div>
-    <p>Wildlife</p>
-  </a>
-
-  <div class="price-filter">
-    <form action="/listings" method="GET">
-
-      <input
-        type="number"
-        name="minPrice"
-        placeholder="Min ₹"
-        class="price-input"
-      />
-
-      <input
-        type="number"
-        name="maxPrice"
-        placeholder="Max ₹"
-        class="price-input"
-      />
-
-      <button type="submit" class="price-btn">
-        Filter
-      </button>
-
-    </form>
-  </div>
-
 </div>
 
   <div class="tax-toggle">

@@ -116,12 +116,12 @@ app.use("/", bookingRouter);
 
 
  app.all("*", (req, res, next)=>{
-   console.log("❌ 404 URL =", req.originalUrl);
-  console.log("❌ METHOD =", req.method);
+   console.log(" 404 URL =", req.originalUrl);
+  console.log("METHOD =", req.method);
   next(new ExpressError(404, "page not found"));
  });
 app.use((err, req, res, next) => {
-  console.log("========== ERROR ==========");
+  console.log(" ERROR ");
   console.log(err);
   console.log("MESSAGE:", err.message);
   console.log("STACK:", err.stack);

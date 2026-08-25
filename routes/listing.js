@@ -72,6 +72,8 @@ function getBestVisitingTime(type) {
 }
 
 
+
+
 router.get("/:id/nearby", async (req, res) => {
 
     try {
@@ -101,13 +103,17 @@ router.get("/:id/nearby", async (req, res) => {
         console.log("USER PREFERENCES =", preferences);
 
         // 5 KM radius
-        const radius = 20000;
+        const radius = 10000;
 
 
         // Geoapify categories
-      const categories =
-    "catering.restaurant,catering.cafe";
-
+     const categories =
+    "catering.restaurant," +
+    "catering.cafe," +
+    "tourism.sights," +
+    "tourism.attraction," +
+    "religion.place_of_worship," +
+    "commercial.supermarket";
 
      const url =
     "https://api.geoapify.com/v2/places" +
@@ -130,71 +136,121 @@ router.get("/:id/nearby", async (req, res) => {
             features.length
         );
 
-const nearbyPlaces = features
-    .map(place => {
 
-        const properties = place.properties;
+const nearbyPlaces = (
+    await Promise.all(
 
-        let type = "Nearby Place";
+        features.map(async place => {
 
-        if (
-            properties.categories?.some(
-                category =>
+            const properties = place.properties || {};
+             
+            let type = "Nearby Place";
+
+
+            // RESTAURANT
+            if (
+                properties.categories?.some(category =>
                     category.startsWith("catering.restaurant")
-            )
-        ) {
-            type = "Restaurant";
-        }
+                )
+            ) {
+                type = "Restaurant";
+            }
 
-        else if (
-            properties.categories?.some(
-                category =>
+
+            // CAFE
+            else if (
+                properties.categories?.some(category =>
                     category.startsWith("catering.cafe")
-            )
-        ) {
-            type = "Cafe";
-        }
+                )
+            ) {
+                type = "Cafe";
+            }
 
 
-        const placeLatitude = properties.lat;
-        const placeLongitude = properties.lon;
+            // TOURIST ATTRACTION
+            else if (
+                properties.categories?.some(category =>
+                    category.startsWith("tourism")
+                )
+            ) {
+                type = "Tourist Attraction";
+            }
 
 
-        const distance = calculateDistance(
-            latitude,
-            longitude,
-            placeLatitude,
-            placeLongitude
-        );
+            // TEMPLE / WORSHIP
+            else if (
+                properties.categories?.some(category =>
+                    category.startsWith("religion")
+                )
+            ) {
+                type = "Temple / Worship";
+            }
 
 
-        const bestTime =
-            getBestVisitingTime(type);
+            // SHOPPING
+            else if (
+                properties.categories?.some(category =>
+                    category.startsWith("commercial")
+                )
+            ) {
+                type = "Shopping";
+            }
 
 
-        return {
-
-            name:
-                properties.name ||
-                "Unnamed Place",
-
-            type: type,
-
-            latitude: placeLatitude,
-
-            longitude: placeLongitude,
-
-            distance:
-                Number(distance.toFixed(2)),
-
-            bestTime: bestTime
-
-        };
-
-    });
+            const placeLatitude = properties.lat;
+            const placeLongitude = properties.lon;
 
 
-    // 👇 YAHAN ADD KARNA HAI
+            if (
+                placeLatitude === undefined ||
+                placeLongitude === undefined
+            ) {
+                return null;
+            }
+
+
+            const distance = calculateDistance(
+                latitude,
+                longitude,
+                placeLatitude,
+                placeLongitude
+            );
+
+
+
+            return {
+
+                name:
+                    properties.name ||
+                    "Unnamed Place",
+
+                type: type,
+
+                latitude:
+                    placeLatitude,
+
+                longitude:
+                    placeLongitude,
+
+                distance:
+                    Number(distance.toFixed(2)),
+
+                bestTime:
+                    getBestVisitingTime(type),
+
+                 mapsUrl:
+    `https://www.google.com/maps/search/?api=1&query=${placeLatitude},${placeLongitude}`,
+
+     
+
+            };
+
+        })
+
+    )
+).filter(place => place !== null);
+
+    // User Prefrence
 
 if (preferences.length > 0) {
 
@@ -235,7 +291,7 @@ if (preferences.length > 0) {
 
     } catch (err) {
 
-        console.log("========== NEARBY PLACES ERROR ==========");
+        console.log("NEARBY PLACES ERROR");
 
         console.log("MESSAGE:", err.message);
 
