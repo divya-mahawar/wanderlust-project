@@ -1,0 +1,119 @@
+
+
+.trip-day-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+
+.trip-day-card h3 {
+    font-weight: 600;
+}
+
+
+.trip-place {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 18px 0;
+
+    border-bottom: 1px solid #eee;
+
+}
+
+
+.trip-place:last-child {
+    border-bottom: none;
+}
+
+
+.trip-place h5 {
+    margin-bottom: 6px;
+}
+
+
+.trip-place .badge {
+    border: 1px solid #ddd;
+}
+
+
+@media (max-width: 600px) {
+
+    .trip-place {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+}
+
+.trip-route {
+    padding: 10px 5px;
+}
+
+.route-point {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.route-icon {
+    font-size: 20px;
+}
+
+.route-line {
+    width: 2px;
+    height: 25px;
+    background: #ccc;
+    margin-left: 9px;
+}
+
+.best-time-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.best-time-box > span {
+    font-size: 20px;
+}
+
+.best-time-box small {
+    display: block;
+    margin-bottom: 2px;
+}
+
+@media print {
+
+    .tripActions,
+    #tripActions,
+    button,
+    select,
+    input,
+    .navbar,
+    footer {
+        display: none !important;
+    }
+
+    .trip-day-card {
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+
+    body {
+        background: white !important;
+    }
+}

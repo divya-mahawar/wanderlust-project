@@ -31,6 +31,7 @@ const { getDefaultAutoSelectFamily } = require("net");
 const dbUrl = process.env.ATLASDB_URL;
 
 const bookingRouter = require("./routes/booking");
+const tripRouter = require("./routes/trip.js");
 
 
 main()
@@ -50,6 +51,7 @@ app.set("view engine", "ejs");
 app.engine("ejs", ejsMate);
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(cookieParser());  
 app.use(express.static(path.join(__dirname, "/public")));
@@ -113,13 +115,22 @@ app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", UserRouter)
 app.use("/", bookingRouter);
+app.use("/trips", tripRouter);
 
+// Chrome DevTools request
+app.get(
+    "/.well-known/appspecific/com.chrome.devtools.json",
+    (req, res) => {
+        res.status(204).end();
+    }
+);
 
  app.all("*", (req, res, next)=>{
    console.log(" 404 URL =", req.originalUrl);
   console.log("METHOD =", req.method);
   next(new ExpressError(404, "page not found"));
  });
+ 
 app.use((err, req, res, next) => {
   console.log(" ERROR ");
   console.log(err);

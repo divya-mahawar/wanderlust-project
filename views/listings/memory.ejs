@@ -1,0 +1,102 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-5">
+
+    <div class="col-md-8 offset-md-2">
+
+        <h2 class="mb-3">
+            📸 Share Your Travel Memory
+        </h2>
+
+        <p class="text-muted">
+            Share a place you visited during your stay at
+            <b><%= listing.title %></b>.
+        </p>
+
+        <form
+            action="/listings/<%= listing._id %>/memories"
+            method="POST"
+            enctype="multipart/form-data"
+            class="mt-4"
+        >
+
+            <!-- Photo -->
+
+            <div class="mb-3">
+
+                <label for="memoryImage" class="form-label">
+                    <b>Travel Photo</b>
+                </label>
+
+                <input
+                    type="file"
+                    name="image"
+                    id="memoryImage"
+                    class="form-control"
+                    accept="image/jpeg,image/png,image/webp"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Place -->
+
+            <div class="mb-3">
+
+                <label for="placeName" class="form-label">
+                    <b>Visited Place</b>
+                </label>
+
+                <input
+                    type="text"
+                    name="placeName"
+                    id="placeName"
+                    class="form-control"
+                    placeholder="Example: Amber Fort"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Caption -->
+
+            <div class="mb-3">
+
+                <label for="caption" class="form-label">
+                    <b>Your Experience</b>
+                </label>
+
+                <textarea
+                    name="caption"
+                    id="caption"
+                    class="form-control"
+                    rows="5"
+                    maxlength="500"
+                    placeholder="Tell future travelers about your experience..."
+                ></textarea>
+
+            </div>
+
+
+           
+            <button
+                type="submit"
+                class="btn btn-dark"
+            >
+                📸 Share Memory
+            </button>
+
+            <a
+                href="/listings/<%= listing._id %>"
+                class="btn btn-outline-secondary ms-2"
+            >
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>

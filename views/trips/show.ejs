@@ -1,0 +1,314 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>🗺️ <%= trip.listing?.title || "My Trip" %></h2>
+
+            <p class="text-muted mb-0">
+                📍 <%= trip.listing?.location || "Unknown location" %>
+            </p>
+        </div>
+
+        <a
+            href="/trips"
+            class="btn btn-outline-dark"
+        >
+            ← My Trips
+        </a>
+
+    </div>
+
+
+    <!-- TRIP INFO -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-md-4">
+
+                    <h5>🗓️ Duration</h5>
+
+                    <p class="text-muted mb-0">
+                        <%= trip.days %> Days
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <h5>🎯 Preferences</h5>
+
+                    <p class="text-muted mb-0">
+
+                        <% if (trip.preferences?.length > 0) { %>
+
+                            <%= trip.preferences.join(", ") %>
+
+                        <% } else { %>
+
+                            All Places
+
+                        <% } %>
+
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <h5>📅 Saved On</h5>
+
+                    <p class="text-muted mb-0">
+
+                        <%= new Date(trip.createdAt).toLocaleDateString() %>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DAY PLANS -->
+     <div
+    id="savedTripMap"
+    style="
+        height: 450px;
+        width: 100%;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    "
+></div>
+
+    <% trip.dayPlans.forEach(dayPlan => { %>
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <h4 class="mb-0">
+                    🗓️ Day <%= dayPlan.day %>
+                </h4>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <% if (dayPlan.places.length === 0) { %>
+
+                    <p class="text-muted">
+                        No places planned for this day.
+                    </p>
+
+                <% } else { %>
+
+
+                    <% dayPlan.places.forEach((place, index) => { %>
+
+                        <div
+                            class="border rounded p-3 mb-3"
+                        >
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+
+                                    <h5>
+                                        <%= index + 1 %>.
+                                        📍 <%= place.name %>
+                                    </h5>
+
+                                    <span class="badge bg-light text-dark">
+                                        <%= place.type %>
+                                    </span>
+
+                                </div>
+
+
+                                <% if (place.mapsUrl) { %>
+
+                                    <a
+                                        href="<%= place.mapsUrl %>"
+                                        target="_blank"
+                                        class="btn btn-outline-dark btn-sm"
+                                    >
+                                        📍 Map
+                                    </a>
+
+                                <% } %>
+
+                            </div>
+
+
+                            <p class="mb-1 mt-2">
+                                🚗 <%= place.distance %> km
+                            </p>
+
+
+                            <div class="best-time-box mt-2">
+
+                                <span>🕐</span>
+
+                                <div>
+
+                                    <small class="text-muted">
+                                        Best time to visit
+                                    </small>
+
+                                    <div>
+                                        <b>
+                                            <%= place.bestTime %>
+                                        </b>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    <% }) %>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    <% }) %>
+
+
+    <!-- ACTIONS -->
+
+    <div class="mb-5">
+
+        <a
+            href="/listings/<%= trip.listing._id %>/trip-planner"
+            class="btn btn-dark w-100"
+        >
+            ✨ Create New Trip
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+    // Listing coordinates
+    const listingCoordinates =
+        <%- JSON.stringify(trip.listing.geometry.coordinates) %>;
+
+    const listingLng = listingCoordinates[0];
+    const listingLat = listingCoordinates[1];
+
+
+    // Saved day plans
+    const dayPlans =
+        <%- JSON.stringify(trip.dayPlans) %>;
+
+
+    // Create map
+    const map = L.map("savedTripMap").setView(
+        [listingLat, listingLng],
+        12
+    );
+
+
+    // OpenStreetMap
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+
+    // 🏠 Stay marker
+    L.marker([
+        listingLat,
+        listingLng
+    ])
+    .addTo(map)
+    .bindPopup("<b>🏠 Your Stay</b>");
+
+
+    // Route starts from stay
+    const routeCoordinates = [
+        [listingLat, listingLng]
+    ];
+
+
+    // Add all places
+    dayPlans.forEach(dayPlan => {
+
+        dayPlan.places.forEach(place => {
+
+            L.marker([
+                place.latitude,
+                place.longitude
+            ])
+            .addTo(map)
+            .bindPopup(`
+                <b>${place.name}</b>
+                <br>
+                ${place.type}
+                <br>
+                🚗 ${place.distance} km
+            `);
+
+
+            routeCoordinates.push([
+                place.latitude,
+                place.longitude
+            ]);
+
+        });
+
+    });
+
+
+    // Return to stay
+    routeCoordinates.push([
+        listingLat,
+        listingLng
+    ]);
+
+
+    // Route line
+    if (routeCoordinates.length > 2) {
+
+        const routeLine = L.polyline(
+            routeCoordinates,
+            {
+                weight: 4
+            }
+        ).addTo(map);
+
+
+        // Auto zoom
+        map.fitBounds(
+            routeLine.getBounds(),
+            {
+                padding: [30, 30]
+            }
+        );
+
+    }
+
+</script>

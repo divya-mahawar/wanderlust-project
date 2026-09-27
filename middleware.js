@@ -124,16 +124,7 @@ module.exports.validateListing = (req, res, next) => {
   next();
 };
 
-module.exports.validateReview = (req, res, next)=>{
-   let { error } =  reviewSchema.validate(req.body);
- if(error){
-  let errMsg = error.details.map((el) => el.message).join(",");
-  throw new ExpressError(400, errMsg);
- }
- else{
-  next();
- }
-};
+
 
 module.exports.isReviewAuthor = async(req, res, next)=>{
     let {id, reviewId} = req.params;
@@ -144,4 +135,34 @@ module.exports.isReviewAuthor = async(req, res, next)=>{
      }
 
      next();
+};
+
+const Booking = require("./models/booking");
+
+module.exports.isBookingUser = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const booking = await Booking.findOne({
+            listing: id,
+            user: req.user._id,
+            status: "confirmed"
+        });
+
+        if (!booking) {
+            req.flash(
+                "error",
+                "You must have a confirmed booking for this listing to share a travel memory."
+            );
+
+            return res.redirect(`/listings/${id}`);
+        }
+
+        req.booking = booking;
+
+        next();
+
+    } catch (err) {
+        next(err);
+    }
 };

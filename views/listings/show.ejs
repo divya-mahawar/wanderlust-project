@@ -1,270 +1,947 @@
 <% layout("/layouts/boilerplate") %>
-<%
-  let coords = [75.7873, 26.9124];
 
-  if (
-    listing?.geometry?.coordinates &&
-    Array.isArray(listing.geometry.coordinates) &&
-    listing.geometry.coordinates.length === 2
-  ) {
-    coords = listing.geometry.coordinates;
-  }
+<link rel="stylesheet" href="/css/show.css">
+
+<%
+    let coords = [75.7873, 26.9124];
+
+    if (
+        listing?.geometry?.coordinates &&
+        Array.isArray(listing.geometry.coordinates) &&
+        listing.geometry.coordinates.length === 2
+    ) {
+        coords = listing.geometry.coordinates;
+    }
+
+    let averageRating = 0;
+
+    if (listing.reviews && listing.reviews.length > 0) {
+        const totalRating = listing.reviews.reduce(
+            (sum, review) => sum + Number(review.rating || 0),
+            0
+        );
+
+        averageRating = (totalRating / listing.reviews.length).toFixed(1);
+    }
 %>
 
 <script>
-  const coords = <%- JSON.stringify(coords) %>;
-  const mapCoords = [coords[1], coords[0]];
-  window.mapCoords = mapCoords;
+    const coords = <%- JSON.stringify(coords) %>;
+    const mapCoords = [coords[1], coords[0]];
+    window.mapCoords = mapCoords;
 </script>
-<div class="row  mt-3">
-   <div class="col-8 offset-3">
-       <h3><%= listing.title %></h3>
-</div>
-    <div class="card col-6 offset-3 show-card  listing-card">
-       <img src="<%=listing.image.url %>" class="card-img-top show-img" alt="listing_image">
-       <div class="card-body">
-        <p class="card-text">
-  Owned by
-  <% if (listing.owner) { %>
-    <i><b><%= listing.owner.username %></b></i>
-  <% } else { %>
-    <i><b>Unknown User</b></i>
-  <% } %>
-</p>
-           <P class="card-text"> <%= listing.description %></P>
-           <p class="card-text"> &#8377; <%= listing.price.toLocaleString("en-IN")%> </p>
-           <p class="card-text"> <%= listing.location %> </p> 
-         <p class="card-text"><%= listing.country %> </p>
 
-<hr>
 
-<div class="booking-box mt-4">
-    <h4>Reserve this place</h4>
+<!-- =====================================================
+     PAGE
+===================================================== -->
 
-    <form action="/listings/<%= listing._id %>/bookings" method="POST">
+<div class="show-page">
 
-        <div class="row">
 
-            <!-- Check-in -->
-            <div class="col-md-6 mb-3">
-                <label for="checkIn" class="form-label">
-                    <b>Check-in</b>
-                </label>
+    <!-- =====================================================
+         BACK
+    ===================================================== -->
 
-                <input
-                    type="date"
-                    id="checkIn"
-                    name="checkIn"
-                    class="form-control"
-                    required
+    <div class="show-container back-row">
+        <a href="/listings" class="back-link">
+            ← Back to Listings
+        </a>
+    </div>
+
+
+    <!-- =====================================================
+         HERO
+===================================================== -->
+
+    <section class="show-container hero-section">
+
+        <!-- LEFT : IMAGE -->
+        <div class="hero-gallery">
+
+            <div class="main-image-wrapper">
+
+                <span class="featured-badge">
+                    ✨ Featured
+                </span>
+
+                <img
+                    src="<%= listing.image.url %>"
+                    class="hero-main-image"
+                    alt="<%= listing.title %>"
                 >
+
+                <div class="image-counter">
+                    📷 1
+                </div>
+
             </div>
 
-            <!-- Check-out -->
-            <div class="col-md-6 mb-3">
-                <label for="checkOut" class="form-label">
-                    <b>Check-out</b>
-                </label>
+            <div class="gallery-thumbnails">
 
-                <input
-                    type="date"
-                    id="checkOut"
-                    name="checkOut"
-                    class="form-control"
-                    required
-                >
-            </div>
+                <div class="gallery-thumb active">
+                    <img
+                        src="<%= listing.image.url %>"
+                        alt="<%= listing.title %>"
+                    >
+                </div>
 
-            <!-- Guests -->
-            <div class="col-md-6 mb-3">
-                <label for="guests" class="form-label">
-                    <b>Guests</b>
-                </label>
-
-                <input
-                    type="number"
-                    id="guests"
-                    name="guests"
-                    class="form-control"
-                    min="1"
-                    value="1"
-                    required
-                >
             </div>
 
         </div>
 
-        <button type="submit" class="btn btn-dark">
-            Reserve
-        </button>
 
-    </form>
-</div>
+        <!-- MIDDLE : DETAILS -->
+        <div class="property-details">
 
-</div>
-     
+            <div class="property-category">
+                <%= listing.category || "Villa" %>
+            </div>
 
-   <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
-    <div class="btns">
-       <a href="/listings/<%= listing._id %>/edit"  class="btn btn-dark col-1 offset-3  edit-btn">Edit</a>
-   
-            <form method="POST" action="/listings/<%=listing._id%>?_method=DELETE"  class="btn btn-dark  offset-5">
-               <button>Delete</button>
-           </form>
-          <%}%>
+            <h1>
+                <%= listing.title %>
+            </h1>
+
+            <p class="property-location">
+                📍 <%= listing.location %>, <%= listing.country %>
+            </p>
+
+
+            <% if (listing.reviews && listing.reviews.length > 0) { %>
+
+                <div class="property-rating">
+                    <span class="rating-star">★</span>
+
+                    <strong>
+                        <%= averageRating %>
+                    </strong>
+
+                    <span>
+                        (<%= listing.reviews.length %> reviews)
+                    </span>
+                </div>
+
+            <% } %>
+
+
+            <div class="property-price">
+                ₹<%= listing.price.toLocaleString("en-IN") %>
+                <span>/ night</span>
+            </div>
+
+
+            <div class="property-description">
+                <%= listing.description %>
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="hero-actions">
+
+                <a
+                    href="/listings/<%= listing._id %>/trip-planner"
+                    class="plan-trip-btn"
+                >
+                    ✨ Plan My Trip
+                </a>
+
+                <button
+                    type="button"
+                    class="wishlist-btn"
+                    onclick="this.classList.toggle('saved')"
+                >
+                    ♡ Save to Wishlist
+                </button>
+
+            </div>
+
+
+            <!-- BOOKING -->
+
+            <div class="booking-card">
+
+                <div class="booking-title">
+                    Reserve this place
+                </div>
+
+                <form
+                    action="/listings/<%= listing._id %>/bookings"
+                    method="POST"
+                >
+
+                    <div class="booking-grid">
+
+                        <div class="booking-field">
+                            <label for="checkIn">
+                                Check-in
+                            </label>
+
+                            <input
+                                type="date"
+                                id="checkIn"
+                                name="checkIn"
+                                required
+                            >
+                        </div>
+
+
+                        <div class="booking-field">
+                            <label for="checkOut">
+                                Check-out
+                            </label>
+
+                            <input
+                                type="date"
+                                id="checkOut"
+                                name="checkOut"
+                                required
+                            >
+                        </div>
+
+
+                        <div class="booking-field">
+                            <label for="guests">
+                                Guests
+                            </label>
+
+                            <input
+                                type="number"
+                                id="guests"
+                                name="guests"
+                                min="1"
+                                value="1"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="reserve-btn"
+                    >
+                        Reserve
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT : OWNER -->
+
+        <div class="owner-card">
+
+            <div class="owner-title">
+                Owner
+            </div>
+
+            <div class="owner-profile">
+
+                <div class="owner-avatar">
+                    👤
+                </div>
+
+                <div>
+                    <strong>
+                        <%= listing.owner ? listing.owner.username : "Unknown User" %>
+                    </strong>
+
+                    <span>
+                        Property Owner
+                    </span>
+                </div>
+
+            </div>
+
+
+            <% if (
+                currUser &&
+                listing.owner &&
+                listing.owner._id.equals(currUser._id)
+            ) { %>
+
+                <div class="owner-actions">
+
+                    <a
+                        href="/listings/<%= listing._id %>/edit"
+                        class="owner-edit-btn"
+                    >
+                        ✏️ Edit Listing
+                    </a>
+
+
+                    <form
+                        method="POST"
+                        action="/listings/<%= listing._id %>?_method=DELETE"
+                    >
+
+                        <button class="owner-delete-btn">
+                            🗑️ Delete
+                        </button>
+
+                    </form>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ===================================================== -->
+
+    <div class="show-container section-navigation">
+
+        <a href="#guest-places" class="active">
+            🏠 Overview
+        </a>
+
+        <a href="#reviews">
+            ☆ Reviews
+        </a>
+
+        <a href="#location">
+            📍 Location
+        </a>
+
+        <a href="#nearby">
+            🧭 Nearby
+        </a>
+
     </div>
 
-     <div class="col-8 offset-3 mb-3">
-          <% if(currUser){%>
-              <hr/>
-         <h4>leave a Review</h4>
-         <form action="/listings/<%= listing._id %>/reviews" method="POST"  novalidate  class="needs-validation">
-      
-         <div class="mb-3 mt-3">
-          <label for="rating" class="form-label">Rating</label>
-         <fieldset class="starability-slot">
-  <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-  <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-  <label for="first-rate1" title="Terrible">1 star</label>
-  <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-  <label for="first-rate2" title="Not good">2 stars</label>
-  <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-  <label for="first-rate3" title="Average">3 stars</label>
-  <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-  <label for="first-rate4" title="Very good">4 stars</label>
-  <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-  <label for="first-rate5" title="Amazing">5 stars</label>
-</fieldset>
-</div>
-    <div class="col-8 offset-3">
-         <label for="comment" class="form-label">Comment</label>
-         <textarea 
-         name="review[comment]" 
-         id="comment" 
-         cols="30" rows="5" 
-         class="form-control"
-         required
-         ></textarea>
-      <div class="invalid-feedback">Please add some comment for review</div>
-    </div>
-    <button  class="btn btn-outline-dark">Submit</button>
-   </form>
-   <hr/>
-  <%} %>
 
-   <% if(listing.reviews.length >0){%>
-   <div class="row">
-    <p><b>All Reviews</b></p>
-   <% for(review of listing.reviews){%>
-     <div class="card col-6 mb-3 ms-3">
-       <div class="card-body">
-         <h5 class="card-title">@<%= review.author.username %></h5>
-         <p class="starability-result card-text" data-rating=" <%= review.rating %>"></p>
-         <p class="card-text"> <%= review.comment %></p>
-         
-       </div>
-       <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-         <button class="btn btn-sm btn-dark">delete</button>
-       </form>
-       </div>
-      <%} %>
-      </div>
-      <%}%>
-     </div>
-     <div class="col-8 offset-3">
-        <h3>Where you'll be</h3>
-    <div id="map" style="height: 400px;"></div>
 
-      </div>
-          <!-- Nearby Places -->
-<div class="container-fluid mt-5 mb-5 nearby-section">
+    <!-- =====================================================
+         PLACES OUR GUESTS VISITED
+    ===================================================== -->
 
-    <h3>Nearby Places</h3>
+    <section
+        class="show-container content-section guest-places-section"
+        id="guest-places"
+    >
 
-    <div id="nearby-loading" class="text-muted">
-        Finding nearby places...
-    </div>
+        <div class="section-heading-row">
 
-    <div id="nearby-error" class="alert alert-danger d-none">
-        Unable to load nearby places.
-    </div>
+            <div>
 
-    <div id="nearby-places" class="row g-3">
-    </div>
+                <h2>
+                    📸 Places Our Guests Visited
+                </h2>
 
-</div>
+                <p>
+                    Places explored by our guests
+                </p>
 
-<script>
-    const listingId = "<%= listing._id %>";
+            </div>
 
-    async function loadNearbyPlaces() {
+            <% if (memories && memories.length > 4) { %>
 
-        const loading = document.getElementById("nearby-loading");
-        const error = document.getElementById("nearby-error");
-        const container = document.getElementById("nearby-places");
+                <button
+                    class="view-all-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#allMemoriesModal"
+                >
+                    View all →
+                </button>
 
-        try {
+            <% } %>
 
-            const response = await fetch(
-                `/listings/${listingId}/nearby`
-            );
+        </div>
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch nearby places");
-            }
 
-            const data = await response.json();
+        <% if (memories && memories.length > 0) { %>
 
-            loading.classList.add("d-none");
+            <div class="memory-cards-grid">
 
-            if (!data.places || data.places.length === 0) {
+                <% memories.slice(0, 4).forEach(memory => { %>
 
-                container.innerHTML = `
-                    <div class="col-12">
-                        <p class="text-muted">
-                            No nearby places found.
+                    <div
+                        class="memory-card"
+                        data-bs-toggle="modal"
+                        data-bs-target="#memoryModal<%= memory._id %>"
+                    >
+
+                        <div class="memory-image-wrapper">
+
+                            <img
+                                src="<%= memory.image.url %>"
+                                alt="<%= memory.placeName %>"
+                            >
+
+                        </div>
+
+
+                        <div class="memory-card-body">
+
+                            <h3>
+                                <%= memory.placeName %>
+                            </h3>
+
+                            <span class="memory-location">
+                                📍 Guest visited
+                            </span>
+
+                            <% if (memory.caption) { %>
+
+                                <p>
+                                    <%= memory.caption %>
+                                </p>
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        <% } else { %>
+
+            <div class="empty-memory">
+
+                <div class="empty-icon">
+                    📸
+                </div>
+
+                <h3>
+                    No guest memories yet
+                </h3>
+
+                <p>
+                    Be the first guest to share your travel experience.
+                </p>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SHARE MEMORY
+    ===================================================== -->
+
+    <% if (currUser) { %>
+
+        <section class="show-container memory-banner">
+
+            <div class="memory-banner-icon">
+                📸
+            </div>
+
+            <div class="memory-banner-content">
+
+                <h2>
+                    Share Your Travel Memory
+                </h2>
+
+                <p>
+                    Have you stayed here? Share your experience
+                    with other travelers!
+                </p>
+
+                <a
+                    href="/listings/<%= listing._id %>/memories/new"
+                    class="share-memory-btn"
+                >
+                    📷 Share Your Memory
+                </a>
+
+            </div>
+
+            <div class="memory-decoration">
+                📷 ✨ 📸
+            </div>
+
+        </section>
+
+    <% } %>
+
+
+
+    <!-- =====================================================
+         LOCATION
+    ===================================================== -->
+
+    <section
+        class="show-container location-section"
+        id="location"
+    >
+
+        <div class="section-title">
+
+            <h2>
+                📍 Location
+            </h2>
+
+        </div>
+
+
+        <div class="location-layout">
+
+            <div class="map-wrapper">
+
+                <div id="map"></div>
+
+            </div>
+
+
+            <div class="location-info-card">
+
+                <h3>
+                    Where you'll be
+                </h3>
+
+                <div class="location-info-item">
+
+                    <span class="location-info-icon">
+                        📍
+                    </span>
+
+                    <div>
+                        <strong>
+                            Location
+                        </strong>
+
+                        <p>
+                            <%= listing.location %>
                         </p>
                     </div>
-                `;
 
-                return;
-            }
+                </div>
 
-            container.innerHTML = data.places.map(place => `
 
-               <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                <div class="location-info-item">
 
-                    <div class="card h-100 nearby-card">
+                    <span class="location-info-icon">
+                        🌍
+                    </span>
 
-                        <div class="card-body">
+                    <div>
+                        <strong>
+                            Country
+                        </strong>
 
-                            <h5 class="card-title">
-                                ${place.name}
+                        <p>
+                            <%= listing.country %>
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="location-info-item">
+
+                    <span class="location-info-icon">
+                        🗺️
+                    </span>
+
+                    <div>
+                        <strong>
+                            Interactive Map
+                        </strong>
+
+                        <p>
+                            Explore the property location
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         NEARBY PLACES
+    ===================================================== -->
+
+    <section
+        class="show-container content-section nearby-section"
+        id="nearby"
+    >
+
+        <div class="section-heading-row">
+
+            <div>
+
+                <h2>
+                    📍 Nearby Places
+                </h2>
+
+                <p>
+                    Explore amazing places around the property
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="nearby-loading"
+            class="nearby-loading"
+        >
+            Finding nearby places...
+        </div>
+
+
+        <div
+            id="nearby-error"
+            class="alert alert-danger d-none"
+        >
+            Unable to load nearby places.
+        </div>
+
+
+        <div
+            id="nearby-places"
+            class="nearby-grid"
+            data-listing-id="<%= listing._id %>"
+        ></div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REVIEWS
+    ===================================================== -->
+
+    <section
+        class="show-container reviews-section"
+        id="reviews"
+    >
+
+        <div class="section-heading-row">
+
+            <div>
+
+                <h2>
+                    ⭐ Reviews
+                    <% if (listing.reviews) { %>
+                        (<%= listing.reviews.length %>)
+                    <% } %>
+                </h2>
+
+                <p>
+                    What our guests are saying
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- REVIEW FORM -->
+
+        <% if (currUser) { %>
+
+            <div class="review-form-card">
+
+                <h3>
+                    ⭐ Leave a Review
+                </h3>
+
+                <form
+                    action="/listings/<%= listing._id %>/reviews"
+                    method="POST"
+                    novalidate
+                    class="needs-validation"
+                >
+
+                    <label class="review-label">
+                        Rating
+                    </label>
+
+
+                    <fieldset class="starability-slot">
+
+                        <input
+                            type="radio"
+                            id="no-rate"
+                            class="input-no-rate"
+                            name="review[rating]"
+                            value="1"
+                            checked
+                        />
+
+                        <input
+                            type="radio"
+                            id="first-rate1"
+                            name="review[rating]"
+                            value="1"
+                        />
+                        <label for="first-rate1">
+                            1 star
+                        </label>
+
+
+                        <input
+                            type="radio"
+                            id="first-rate2"
+                            name="review[rating]"
+                            value="2"
+                        />
+                        <label for="first-rate2">
+                            2 stars
+                        </label>
+
+
+                        <input
+                            type="radio"
+                            id="first-rate3"
+                            name="review[rating]"
+                            value="3"
+                        />
+                        <label for="first-rate3">
+                            3 stars
+                        </label>
+
+
+                        <input
+                            type="radio"
+                            id="first-rate4"
+                            name="review[rating]"
+                            value="4"
+                        />
+                        <label for="first-rate4">
+                            4 stars
+                        </label>
+
+
+                        <input
+                            type="radio"
+                            id="first-rate5"
+                            name="review[rating]"
+                            value="5"
+                        />
+                        <label for="first-rate5">
+                            5 stars
+                        </label>
+
+                    </fieldset>
+
+
+                    <label
+                        for="comment"
+                        class="review-label"
+                    >
+                        Comment
+                    </label>
+
+                    <textarea
+                        name="review[comment]"
+                        id="comment"
+                        rows="4"
+                        required
+                        placeholder="Share your experience..."
+                    ></textarea>
+
+
+                    <button
+                        class="submit-review-btn"
+                    >
+                        Submit Review
+                    </button>
+
+                </form>
+
+            </div>
+
+        <% } %>
+
+
+        <!-- ALL REVIEWS -->
+
+        <% if (listing.reviews && listing.reviews.length > 0) { %>
+
+            <div class="reviews-grid">
+
+                <% listing.reviews.forEach(review => { %>
+
+                    <div class="review-card">
+
+                        <div class="review-user">
+
+                            <div class="review-avatar">
+                                👤
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    @<%= review.author.username %>
+                                </strong>
+
+                                <div
+                                    class="starability-result"
+                                    data-rating="<%= review.rating %>"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <p class="review-comment">
+                            <%= review.comment %>
+                        </p>
+
+
+                        <% if (
+                            currUser &&
+                            review.author &&
+                            review.author._id.equals(currUser._id)
+                        ) { %>
+
+                            <form
+                                method="POST"
+                                action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                            >
+
+                                <button class="delete-review-btn">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        <% } %>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        <% } else { %>
+
+            <div class="no-reviews">
+                No reviews yet. Be the first to review this place.
+            </div>
+
+        <% } %>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MEMORY MODALS
+    ===================================================== -->
+
+    <% if (memories && memories.length > 0) { %>
+
+        <% memories.slice(0, 4).forEach(memory => { %>
+
+            <div
+                class="modal fade"
+                id="memoryModal<%= memory._id %>"
+                tabindex="-1"
+                aria-hidden="true"
+            >
+
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+
+                    <div class="modal-content guest-memory-modal">
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+                                📍 <%= memory.placeName %>
                             </h5>
 
-                            <p class="nearby-info">
-                                <strong>Type:</strong>
-                                ${place.type}
-                            </p>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                            ></button>
 
-                            <p class="nearby-info">
-                                <strong>Distance:</strong>
-                                ${place.distance} km
-                            </p>
+                        </div>
 
-                            <p class="nearby-info">
-                                <strong>Best Time:</strong>
-                                ${place.bestTime}
-                            </p>
 
-                            <a
-                                href="${place.mapsUrl}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="btn btn-outline-dark nearby-map-btn"
+                        <div class="modal-body">
+
+                            <img
+                                src="<%= memory.image.url %>"
+                                class="memory-full-image"
+                                alt="<%= memory.placeName %>"
                             >
-                                 View on Map
-                            </a>
+
+
+                            <div class="memory-details">
+
+                                <% if (memory.user) { %>
+
+                                    <p class="memory-user">
+                                        Shared by
+                                        <strong>
+                                            @<%= memory.user.username %>
+                                        </strong>
+                                    </p>
+
+                                <% } %>
+
+
+                                <% if (memory.caption) { %>
+
+                                    <p class="memory-caption">
+                                        <%= memory.caption %>
+                                    </p>
+
+                                <% } %>
+
+
+                                <small class="text-muted">
+
+                                    <%= new Date(
+                                        memory.createdAt
+                                    ).toLocaleDateString("en-IN") %>
+
+                                </small>
+
+
+                                <% if (
+                                    memory.placeGeometry &&
+                                    memory.placeGeometry.coordinates &&
+                                    memory.placeGeometry.coordinates.length === 2
+                                ) { %>
+
+                                    <div class="mt-3">
+
+                                        <a
+                                            href="https://www.google.com/maps/search/?api=1&query=<%= memory.placeGeometry.coordinates[1] %>,<%= memory.placeGeometry.coordinates[0] %>"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="btn btn-outline-dark btn-sm"
+                                        >
+                                            📍 View on Map
+                                        </a>
+
+                                    </div>
+
+                                <% } %>
+
+                            </div>
 
                         </div>
 
@@ -272,21 +949,123 @@
 
                 </div>
 
-            `).join("");
+            </div>
 
-        } catch (err) {
+        <% }) %>
 
-            console.error("Nearby Places Error:", err);
+    <% } %>
 
-            loading.classList.add("d-none");
-            error.classList.remove("d-none");
-        }
-    }
 
-    loadNearbyPlaces();
-</script> 
-     </div>
 
+    <!-- =====================================================
+         ALL MEMORIES MODAL
+    ===================================================== -->
+
+    <% if (memories && memories.length > 4) { %>
+
+        <div
+            class="modal fade"
+            id="allMemoriesModal"
+            tabindex="-1"
+            aria-hidden="true"
+        >
+
+            <div
+                class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+            >
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+                            📸 All Guest Memories
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                        ></button>
+
+                    </div>
+
+
+                    <div class="modal-body">
+
+                        <div class="all-memories-grid">
+
+                            <% memories.forEach(memory => { %>
+
+                                <div class="all-memory-card">
+
+                                    <img
+                                        src="<%= memory.image.url %>"
+                                        alt="<%= memory.placeName %>"
+                                    >
+
+
+                                    <div class="all-memory-content">
+
+                                        <h6>
+                                            📍 <%= memory.placeName %>
+                                        </h6>
+
+
+                                        <% if (memory.user) { %>
+
+                                            <small>
+                                                @<%= memory.user.username %>
+                                            </small>
+
+                                        <% } %>
+
+
+                                        <% if (memory.caption) { %>
+
+                                            <p>
+                                                <%= memory.caption %>
+                                            </p>
+
+                                        <% } %>
+
+
+                                        <small class="text-muted">
+
+                                            <%= new Date(
+                                                memory.createdAt
+                                            ).toLocaleDateString("en-IN") %>
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            <% }) %>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    <% } %>
+
+</div>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="/js/map.js"></script>
+
+<script src="/js/nearby.js"></script>

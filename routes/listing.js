@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const Listing = require("../models/listing.js");
-const {isloggedIn, isOwner, validateListing} = require("../middleware.js");
+const GuestMemory = require("../models/guestMemory.js");
+const Trip = require("../models/trip.js");
+const {isloggedIn, isOwner, validateListing,  isBookingUser} = require("../middleware.js");
 const listingController = require("../controllers/listings.js");
 const multer  = require('multer');
 
@@ -28,19 +30,30 @@ router.get("/new", isloggedIn, listingController.renderNewForm);
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
 
-    const R = 6371; // Earth radius in KM
+    const R = 6371;
 
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const dLat =
+        (lat2 - lat1) * Math.PI / 180;
+
+    const dLon =
+        (lon2 - lon1) * Math.PI / 180;
 
     const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
         Math.cos(lat1 * Math.PI / 180) *
         Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c =
-        2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        );
 
     return R * c;
 }
@@ -311,6 +324,178 @@ if (preferences.length > 0) {
 
 });
 
+// GET memory form
+router.get(
+  "/:id/memories/new",
+  isloggedIn,
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      req.flash("error", "Listing not found");
+      return res.redirect("/listings");
+    }
+
+    res.render("listings/memory.ejs", { listing });
+  })
+);
+router.post(
+  "/:id/memories",
+  isloggedIn,
+  isBookingUser,
+  upload.single("image"),
+  wrapAsync(async (req, res) => {
+
+    console.log("🔥 MEMORY POST ROUTE HIT");
+
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      req.flash("error", "Listing not found");
+      return res.redirect("/listings");
+    }
+
+    console.log("LISTING FOUND:", listing._id);
+
+    if (!req.file) {
+      console.log("❌ FILE NOT FOUND");
+
+      req.flash("error", "Please upload a travel photo");
+      return res.redirect(`/listings/${req.params.id}`);
+    }
+
+    const { placeName, caption } = req.body;
+
+    console.log("PLACE:", placeName);
+    console.log("CAPTION:", caption);
+    console.log("FILE:", req.file);
+
+
+   let placeCoordinates = listing.geometry.coordinates;
+
+try {
+
+  const listingCoords = listing.geometry.coordinates;
+
+  const response = await axios.get(
+    "https://api.geoapify.com/v1/geocode/search",
+    {
+      params: {
+        text: placeName,
+        apiKey: process.env.GEOAPIFY_API_KEY,
+
+        // Search near the listing
+        bias: `proximity:${listingCoords[0]},${listingCoords[1]}`,
+
+        // Take best result
+        limit: 1
+      }
+    }
+  );
+
+  if (response.data.features?.length > 0) {
+
+    placeCoordinates =
+      response.data.features[0].geometry.coordinates;
+
+  }
+
+} catch (err) {
+
+  console.log(
+    "Geoapify error:",
+    err.message
+  );
+} 
+  
+
+
+    const memory = new GuestMemory({
+
+      user: req.user._id,
+
+      listing: listing._id,
+
+      booking: req.booking._id,
+
+      image: {
+        url: req.file.path,
+        filename: req.file.filename
+      },
+
+      placeName,
+
+      placeGeometry: {
+        type: "Point",
+        coordinates: placeCoordinates
+      },
+
+      caption
+
+    });
+
+
+    await memory.save();
+
+    console.log("✅ MEMORY SAVED:", memory);
+
+
+    req.flash(
+      "success",
+      "Your travel memory has been shared successfully!"
+    );
+
+    res.redirect(`/listings/${listing._id}`);
+
+  })
+);
+
+router.get(
+  "/:id/trip-planner",
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      req.flash("error", "Listing not found");
+      return res.redirect("/listings");
+    }
+
+    res.render("listings/trip-planner.ejs", {
+      listing
+    });
+  })
+);
+
+router.post(
+    "/:id/trip-planner/save",
+    isloggedIn,
+    wrapAsync(async (req, res) => {
+
+        const listing = await Listing.findById(req.params.id);
+
+        if (!listing) {
+            return res.status(404).json({
+                success: false,
+                error: "Listing not found"
+            });
+        }
+
+        const trip = new Trip({
+            user: req.user._id,
+            listing: listing._id,
+            days: req.body.days,
+            preferences: req.body.preferences || [],
+            dayPlans: req.body.dayPlans || []
+        });
+
+        await trip.save();
+
+        res.json({
+            success: true,
+            message: "Trip saved successfully!"
+        });
+    })
+);
 
 router
 .route("/:id")

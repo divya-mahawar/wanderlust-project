@@ -1,0 +1,816 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/trip-planner.css">
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h2>🗺️ Plan Your Trip</h2>
+
+        <p class="text-muted">
+            Discover places around
+            <b><%= listing.location %></b>
+        </p>
+    </div>
+
+
+    <!-- TRIP SETTINGS -->
+
+    <div class="card shadow-sm p-4 mx-auto"
+         style="max-width: 600px;">
+
+        <h4 class="mb-3">How many days?</h4>
+
+        <select
+            id="tripDays"
+            class="form-select mb-3"
+        >
+            <option value="1">1 Day</option>
+            <option value="2">2 Days</option>
+            <option value="3" selected>3 Days</option>
+            <option value="4">4 Days</option>
+            <option value="5">5 Days</option>
+        </select>
+
+        <div class="mb-3">
+
+    <label class="form-label">
+        <b>What do you want to explore?</b>
+    </label>
+
+    <div class="row g-2">
+
+        <div class="col-md-6">
+            <label class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value="Tourist Attraction"
+                    name="preference"
+                >
+                🏰 Tourist Attractions
+            </label>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value="Temple / Worship"
+                    name="preference"
+                >
+                🛕 Temples
+            </label>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value="Shopping"
+                    name="preference"
+                >
+                🛍️ Shopping
+            </label>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value="Cafe"
+                    name="preference"
+                >
+                ☕ Cafes
+            </label>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-check">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value="Restaurant"
+                    name="preference"
+                >
+                🍽️ Restaurants
+            </label>
+        </div>
+
+    </div>
+
+</div>
+
+
+       <button
+    type="button"
+    class="btn btn-dark w-100"
+    onclick="generateTrip()"
+>
+    ✨ Generate My Trip
+</button>
+
+
+
+
+
+
+    <div
+        id="nearby-places"
+        data-listing-id="<%= listing._id %>"
+        class="row g-4"
+    ></div>
+
+</div>
+
+<!-- Loading -->
+<div
+    id="loading"
+    class="text-center mt-5"
+    style="display:none;"
+>
+    <div class="spinner-border"></div>
+
+    <p class="mt-2">
+        Finding nearby places...
+    </p>
+</div>
+
+<!-- Error -->
+<div
+    id="error"
+    class="alert alert-danger mt-4"
+    style="display:none;"
+></div>
+
+<!-- Itinerary -->
+<div id="itinerary" class="mt-5"></div>
+
+<!-- Print -->
+<div id="tripActions" class="mt-3" style="display:none;">
+
+    <button
+        type="button"
+        class="btn btn-outline-dark w-100"
+        onclick="window.print()"
+    >
+        🖨️ Print / Save Itinerary
+    </button>
+
+    <button
+    type="button"
+    id="saveTripBtn"
+    class="btn btn-success w-100 mt-2"
+    onclick="saveTrip()"
+    style="display:none;"
+>
+    💾 Save My Trip
+</button>
+
+</div>
+
+
+<script>
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+
+    const dLat =
+        (lat2 - lat1) * Math.PI / 180;
+
+    const dLon =
+        (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c =
+        2 * Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        );
+
+    return R * c;
+}
+
+function getTimeSlot(type) {
+<!-- NEARBY PLACES -->
+
+    if (
+        type === "Tourist Attraction" ||
+        type === "Temple / Worship"
+    ) {
+        return "Morning";
+    }
+
+    if (
+        type === "Shopping" ||
+        type === "Cafe"
+    ) {
+        return "Afternoon";
+    }
+
+    if (type === "Restaurant") {
+        return "Evening";
+    }
+
+    return "Afternoon";
+}
+let generatedTripDays = [];
+  async function generateTrip() {
+
+    const days =
+        Number(document.getElementById("tripDays").value);
+
+    // Selected preferences
+    const selectedPreferences =
+        Array.from(
+            document.querySelectorAll(
+                'input[name="preference"]:checked'
+            )
+        ).map(input => input.value);
+
+
+    const itinerary =
+        document.getElementById("itinerary");
+
+    const loading =
+        document.getElementById("loading");
+
+    const error =
+        document.getElementById("error");
+
+
+    // Clear previous result
+
+    itinerary.innerHTML = "";
+
+    error.style.display = "none";
+
+    loading.style.display = "block";
+
+
+    try {
+
+        // Nearby API URL
+
+        let nearbyUrl =
+            "/listings/<%= listing._id %>/nearby";
+
+
+        // Add preferences if selected
+
+        if (selectedPreferences.length > 0) {
+
+            nearbyUrl +=
+                "?preferences=" +
+                selectedPreferences
+                    .map(p => encodeURIComponent(p))
+                    .join(",");
+        }
+
+
+        console.log(
+            "API URL =",
+            nearbyUrl
+        );
+
+
+        // Call nearby API
+
+        const response =
+            await fetch(nearbyUrl);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to find nearby places"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "NEARBY DATA =",
+            data
+        );
+
+
+        let places =
+            data.places || [];
+
+
+        if (places.length === 0) {
+
+            throw new Error(
+                "No nearby places found."
+            );
+        }
+
+
+        /*
+         * Priority
+         */
+
+    const startLat = data.listing.latitude;
+const startLon = data.listing.longitude;
+
+function createRoute(startLat, startLon, places) {
+
+    const remaining = [...places];
+    const route = [];
+
+    let currentLat = startLat;
+    let currentLon = startLon;
+
+    while (remaining.length > 0) {
+
+        let nearestIndex = 0;
+        let nearestDistance = Infinity;
+
+        for (let i = 0; i < remaining.length; i++) {
+
+            const place = remaining[i];
+
+            const distance = calculateDistance(
+                currentLat,
+                currentLon,
+                place.latitude,
+                place.longitude
+            );
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestIndex = i;
+            }
+        }
+
+        const nearestPlace =
+            remaining.splice(nearestIndex, 1)[0];
+
+        route.push(nearestPlace);
+
+        currentLat = nearestPlace.latitude;
+        currentLon = nearestPlace.longitude;
+    }
+
+    return route;
+}
+
+places = createRoute(
+    startLat,
+    startLon,
+    places
+);
+
+
+        /*
+         * Remove duplicate places
+         */
+
+        const uniquePlaces = [];
+
+        const names = new Set();
+
+
+        for (const place of places) {
+
+            const name =
+                place.name
+                    ?.trim()
+                    .toLowerCase();
+
+
+            if (
+                !name ||
+                names.has(name)
+            ) {
+                continue;
+            }
+
+
+            names.add(name);
+
+            uniquePlaces.push(place);
+
+        }
+
+
+        places =
+            uniquePlaces;
+
+
+        /*
+         * Maximum 3 places per day
+         */
+
+        const totalPlaces =
+            days * 3;
+
+
+        places =
+            places.slice(
+                0,
+                totalPlaces
+            );
+
+
+        /*
+         * Create empty days
+         */
+
+        const dayPlans = [];
+
+
+        for (
+            let i = 0;
+            i < days;
+            i++
+        ) {
+
+            dayPlans.push([]);
+
+        }
+
+
+        /*
+         * Distribute places
+         */
+
+        for (
+            const place of places
+        ) {
+
+            let shortestDay = 0;
+
+
+            for (
+                let i = 1;
+                i < dayPlans.length;
+                i++
+            ) {
+
+                if (
+                    dayPlans[i].length <
+                    dayPlans[shortestDay].length
+                ) {
+
+                    shortestDay = i;
+
+                }
+            
+            }
+
+
+            if (
+                dayPlans[shortestDay].length < 3
+              
+            ) {
+
+                dayPlans[
+                    shortestDay
+                ].push(place);
+
+            }
+
+        }
+        generatedTripDays = dayPlans;
+
+
+        /*
+         * Generate HTML
+         */
+
+        let html = "";
+
+
+        for (
+            let day = 1;
+            day <= days;
+            day++
+        ) {
+
+            const dayPlaces =
+                dayPlans[day - 1];
+                dayPlaces.sort((a, b) => {
+
+    const slotOrder = {
+        "Morning": 1,
+        "Afternoon": 2,
+        "Evening": 3
+    };
+
+    const aSlot =
+        getTimeSlot(a.type);
+
+    const bSlot =
+        getTimeSlot(b.type);
+
+    return (
+        slotOrder[aSlot] -
+        slotOrder[bSlot]
+    );
+});
+
+                 // Calculate approximate distance
+    const dayDistance = dayPlaces.reduce(
+        (total, place) => total + place.distance,
+        0
+    );
+
+    const formattedDistance =
+        Number(dayDistance.toFixed(2));
+      
+     // Create route points for this day
+const routePoints = [
+    {
+        lat: data.listing.latitude,
+        lon: data.listing.longitude
+    }
+];
+
+dayPlaces.forEach(place => {
+    routePoints.push({
+        lat: place.latitude,
+        lon: place.longitude
+    });
+});
+
+// Return to stay
+routePoints.push({
+    lat: data.listing.latitude,
+    lon: data.listing.longitude
+});
+
+// Google Maps route
+const origin =
+    `${routePoints[0].lat},${routePoints[0].lon}`;
+
+const destination =
+    `${routePoints[routePoints.length - 1].lat},${routePoints[routePoints.length - 1].lon}`;
+
+const waypoints =
+    routePoints
+        .slice(1, -1)
+        .map(point => `${point.lat},${point.lon}`)
+        .join("|");
+
+const routeMapUrl =
+    `https://www.google.com/maps/dir/?api=1` +
+    `&origin=${origin}` +
+    `&destination=${destination}` +
+    (waypoints
+        ? `&waypoints=${encodeURIComponent(waypoints)}`
+        : "");   
+  
+      let routeHTML = `
+    <div class="route-point">
+        <span class="route-icon">🏠</span>
+        <span>Stay</span>
+    </div>
+`;
+
+dayPlaces.forEach((place, index) => {
+
+    routeHTML += `
+        <div class="route-line"></div>
+
+        <div class="route-point">
+            <span class="route-icon">📍</span>
+            <span>${place.name}</span>
+        </div>
+    `;
+});
+
+routeHTML += `
+    <div class="route-line"></div>
+
+    <div class="route-point">
+        <span class="route-icon">🏠</span>
+        <span>Back to Stay</span>
+    </div>
+`;
+
+            html += `
+
+                <div class="card shadow-sm mb-4 trip-day-card">
+
+                    <div class="card-body">
+
+                        <h3 class="mb-3">
+                            📅 Day ${day}
+                        </h3>
+
+                         <p class="text-muted">
+                 Approx. distance from stay:
+                <b>${formattedDistance} km</b>
+            </p>
+
+
+            <a
+    href="${routeMapUrl}"
+    target="_blank"
+    class="btn btn-outline-dark btn-sm mt-2"
+>
+    🗺️ Open Day ${day} Route
+</a>
+            <div class="alert alert-light border mt-3">
+    <b>🗺️ Suggested Route</b>
+
+    <div class="trip-route mt-3">
+        ${routeHTML}
+    </div>
+</div>
+
+                        <hr>
+
+            `;
+
+
+            if (
+                dayPlaces.length === 0
+            ) {
+
+                html += `
+
+                    <p class="text-muted">
+                        No nearby places available.
+                    </p>
+
+                `;
+
+                }
+
+
+            dayPlaces.forEach(
+                place => {
+
+                    html += `
+
+                        <div class="trip-place">
+
+                            <div>
+
+                                <h5>
+                                    📍 ${place.name}
+                                </h5>
+
+                                <span class="badge bg-light text-dark">
+                                    ${place.type}
+                                </span>
+                                <span class="badge bg-dark ms-1">
+    ${getTimeSlot(place.type)}
+</span>
+
+                                <p class="mb-1 mt-2">
+                                    🚗 ${place.distance} km away
+                                </p>
+<div class="best-time-box mt-2 mb-2">
+    <span>🕐</span>
+    <div>
+        <small class="text-muted">Best time to visit</small>
+        <div><b>${place.bestTime}</b></div>
+    </div>
+</div>
+                        
+                            </div>
+
+                            <a
+                                href="${place.mapsUrl}"
+                                target="_blank"
+                                class="btn btn-outline-dark btn-sm"
+                            >
+                                📍 View Map
+                            </a>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        itinerary.innerHTML =
+            html;
+document.getElementById("tripActions").style.display = "block";
+document.getElementById("saveTripBtn").style.display = "block";
+
+    } catch (err) {
+
+        console.log(
+            "TRIP PLANNER ERROR:",
+            err
+        );
+
+
+        error.innerText =
+            err.message ||
+            "Something went wrong.";
+
+
+        error.style.display =
+            "block";
+
+
+    } finally {
+
+        loading.style.display =
+            "none";
+
+    }
+
+}
+
+async function saveTrip() {
+
+    const days = Number(
+        document.getElementById("tripDays").value
+    );
+
+    const preferences = Array.from(
+        document.querySelectorAll(
+            'input[name="preference"]:checked'
+        )
+    ).map(input => input.value);
+
+
+    try {
+
+        const response = await fetch(
+            "/listings/<%= listing._id %>/trip-planner/save",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    days: days,
+                    preferences: preferences,
+                    dayPlans: generatedTripDays
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (data.success) {
+
+            alert("✅ Trip saved successfully!");
+
+        } else {
+
+            alert(
+                "❌ " +
+                (data.error || "Unable to save trip")
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log("SAVE TRIP ERROR:", error);
+
+        alert("❌ Something went wrong while saving the trip.");
+
+    }
+}
+
+
+</script>
+
