@@ -210,4 +210,4 @@ module.exports.distroyListing = async (req, res) => {
    req.flash("success", " listing Deleted");
   res.redirect("/listings");
 };
- 
+   
